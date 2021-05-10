@@ -58,3 +58,25 @@ export const AnswerContainer = styled.div<{}>`
             #4B4B4B 46px /*+2px here*/
         );
 `
+
+export const DraggableWord = styled.div`
+    cursor: pointer;
+    background: #FFFFFF;
+    border: 1px solid #C9C9C9;
+    box-shadow: 0px 8px 4px -6px rgba(0, 0, 0, 0.25);
+    border-radius: 13px;
+    font-size: 18px;
+    line-height: 21px;
+    width: 70px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+export const Warning = styled.div`
+    font-size: 24px;
+    line-height: 28px;
+    color: #FF0000;
+    text-shadow: -1px -2px 2px #FFFFFF, 1px 2px 2px rgba(91, 13, 13, 0.5);
+`;

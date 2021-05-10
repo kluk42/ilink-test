@@ -1,8 +1,8 @@
 import {FC} from 'react';
-import { WordToRender } from '../App/types';
+import { WordToPick } from '../App/types';
 
 type OwnProps = {
-    words: WordToRender[];
+    words: WordToPick[];
 };
 
 export type Props = FC<OwnProps>;

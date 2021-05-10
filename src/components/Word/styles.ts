@@ -1,6 +1,16 @@
 import styled from 'styled-components';
 
-export const WordContainer = styled.div<{isInCollection?: boolean}>`
+import { WordContainerProps } from './types';
+
+export const WordContainer = styled.div.attrs<WordContainerProps>((props) => ({
+    style: {
+        transform: !!props.transform ?  `translate3d(${props.transform.x}px, ${props.transform.y}px, 0)` : undefined,
+        zIndex: !!props.transform ? 3 : 2,
+        transition: !!props.transition ? props.transition : undefined,
+    },
+}))<WordContainerProps>`
+    visibility: ${props => props.isVisible ? 'visible' : 'hidden'};
+    cursor: pointer;
     background: #FFFFFF;
     border: 1px solid #C9C9C9;
     box-shadow: 0px 8px 4px -6px rgba(0, 0, 0, 0.25);
@@ -11,8 +21,7 @@ export const WordContainer = styled.div<{isInCollection?: boolean}>`
     height: 30px;
     display: flex;
     justify-content: center;
-    margin-top: ${props => !props.isInCollection ? '8px' : 0};
     align-items: center;
     position: relative;
-    z-index: 2;
+    margin-top: ${props => !props.isInCollection ? '8px' : 0};
 `

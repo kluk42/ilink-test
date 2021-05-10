@@ -8,6 +8,13 @@ export type WordFromBackend = {
     content: string;
 };
 
-export type WordToRender = {
-    field: FieldNames
-} & WordFromBackend;
+export type WordToPick = WordFromBackend & {isRenderedInCollection: boolean}
+
+export type ActiveWord = WordFromBackend & {sourceContainer: FieldNames};
+
+export type ReplacedWord = WordFromBackend & {initialIndex: number};
+
+export interface WordsToRender {
+    [FieldNames.Answer]: WordToPick[],
+    [FieldNames.Collection]: WordToPick[],
+}

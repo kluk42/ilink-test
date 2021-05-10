@@ -1,42 +1,36 @@
-import { Droppable } from 'react-beautiful-dnd';
+import { useDroppable } from '@dnd-kit/core';
+import {SortableContext} from '@dnd-kit/sortable'
 
 import {AnswerContainer} from './styles';
 
+import { FieldNames } from '../App/types';
 import {Props} from './types';
 
 import Word from '../Word/Word';
-import { FieldNames } from '../App/types';
 
 const Answer: Props = ({words}) => {
+    const {setNodeRef} = useDroppable({
+        id: FieldNames.Answer,
+    });
   return (
-            <Droppable
-                droppableId="Answer"
-            >
-                {
-                    (provided) => {
-                        return (
-                            <AnswerContainer
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                            >
-                                {
-                                    words.map((word, index) => {
-                                        return (
-                                            word.field === FieldNames.Answer
-                                            &&
-                                            <Word
-                                                key={word.id}
-                                                word={word}
-                                                index={index}
-                                            />
-                                        )
-                                    })
-                                }
-                            </AnswerContainer>  
-                        )
-                    }
-                }
-            </Droppable>
+    <SortableContext
+        id={FieldNames.Answer}
+        items={words}
+    >
+        <AnswerContainer ref={setNodeRef}>
+            {
+                words.map((word) => {
+                    return (
+                        <Word
+                            key={word.id}
+                            word={word}
+                            isVisible={true}
+                        />
+                    )
+                })
+            }
+        </AnswerContainer>
+    </SortableContext>
   );
 }
 

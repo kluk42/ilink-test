@@ -1,8 +1,8 @@
 import {FC} from 'react';
-import { WordToRender } from '../App/types';
+import { WordFromBackend } from '../App/types';
 
 type OwnProps = {
-    words: WordToRender[];
+    words: WordFromBackend[];
 };
 
 export type Props = FC<OwnProps>;

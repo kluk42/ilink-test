@@ -1,27 +1,25 @@
-import { Draggable } from 'react-beautiful-dnd';
+import {useSortable} from '@dnd-kit/sortable';
 import {WordContainer} from './styles';
 
 import {Props} from './types';
 
-const Answer: Props = ({word, index, isInCollection}) => {
-  return (
-            <Draggable draggableId={word.id} index={index}>
-                {
-                    (provided, snapshot) => {
-                        return (
-                            <WordContainer
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                isInCollection={isInCollection}
-                            >
-                                {word.content}
-                            </WordContainer>
-                        )
-                    }
-                }
-            </Draggable>
+const Word: Props = ({word, isInCollection, isVisible}) => {
+    const {attributes, listeners, setNodeRef, transform, transition} = useSortable({
+        id: word.id,
+      });
+      return (
+        <WordContainer
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            isInCollection={isInCollection}
+            transform={transform}
+            transition={transition}
+            isVisible={isVisible}
+        >
+            {word.content}
+        </WordContainer>
   );
 }
 
-export default Answer;
+export default Word;
