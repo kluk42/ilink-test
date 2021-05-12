@@ -5,7 +5,7 @@ import { WordContainerProps } from './types';
 export const WordContainer = styled.div.attrs<WordContainerProps>((props) => ({
     style: {
         transform: !!props.transform ?  `translate3d(${props.transform.x}px, ${props.transform.y}px, 0)` : undefined,
-        zIndex: !!props.transform ? 3 : 2,
+        zIndex: 9999,
         transition: !!props.transition ? props.transition : undefined,
     },
 }))<WordContainerProps>`
@@ -24,4 +24,5 @@ export const WordContainer = styled.div.attrs<WordContainerProps>((props) => ({
     align-items: center;
     position: relative;
     margin-top: ${props => !props.isInCollection ? '8px' : 0};
+    user-select: none;
 `

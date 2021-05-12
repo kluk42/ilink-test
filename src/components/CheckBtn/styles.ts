@@ -15,4 +15,8 @@ export const Button = styled.button<StyleProps>`
     line-height: 21px;
     margin-top: ${props => props.isWrong ? '27px' : '79px'};
     color: ${props => props.active ? 'black' : 'grey'};
+
+    &:active {
+        box-shadow: inset -2px -4px 12px #FFFFFF, inset 2px 4px 8px rgba(0, 0, 0, 0.2);
+    }
 `

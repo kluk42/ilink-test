@@ -42,7 +42,7 @@ function App() {
     const [replacedWord, setReplacedWord] = useState<ReplacedWord | null>(null);
     const [isTranslationWrong, setIsTranslationWrong] = useState(false);
     const synthRef = useRef(window.speechSynthesis);
-
+    console.log(words[FieldNames.Collection])
     function handleDragStart(event: DragStartEvent) {
         setIsTranslationWrong(false);
 
@@ -77,7 +77,27 @@ function App() {
         }
             
         if (!isInAnswer) {
-            wordsSetter(FieldNames.Collection)
+            const pickedWord = words[FieldNames.Collection].find(word => word.id === event.active.id);
+            if (pickedWord) {
+                setActiveWord({
+                    ...pickedWord,
+                    sourceContainer: sourceContainer,
+                });
+                const newArray = [...words[FieldNames.Collection]];
+                const wordToInsert: WordToPick = {
+                    ...pickedWord,
+                    id: pickedWord.id + ' empty',
+                    isRenderedInCollection: false
+                }
+                const positionToRemove = words[FieldNames.Collection].findIndex(w => w.id === pickedWord.id);
+                newArray.splice(positionToRemove, 1);
+                newArray.push(wordToInsert);
+                setWords(prev => ({
+                    ...prev,
+                    [FieldNames.Collection]: newArray,
+                }));
+                return
+            }
         }
     }
 
@@ -251,43 +271,113 @@ function App() {
             if (containerName === FieldNames.Collection) {
                 const [, temp] = over.id.split(' ');
                 if (temp === 'temp' && replacedWord) {
-                    const [replacedId] = replacedWord.id.split(' ');
-                    const isNecessaryCell = replacedId === activeWord.id;
+                    const initialPosition = wordsFromBackend.findIndex(w => w.id === activeWord.id);
+                    const hoveredPosition = words[FieldNames.Collection].findIndex(w => w.id === activeWord.id + ' temp');
+                    const isNecessaryCell = initialPosition === hoveredPosition;
+                    const wordToInsert: WordToPick = {
+                        id: activeWord.id,
+                        content: activeWord.content,
+                        isRenderedInCollection: true,
+                    }
+                    const wordToReturn: WordToPick = {
+                        id: replacedWord.id,
+                        content: replacedWord.content,
+                        isRenderedInCollection: false,
+                    }
+                    
                     if (isNecessaryCell) {
                         const newCollection = [...words[FieldNames.Collection]];
-                        const wordToInsert: WordToPick = {
-                            id: activeWord.id,
-                            content: activeWord.content,
-                            isRenderedInCollection: true,
+                        const positionToRemove = words[FieldNames.Collection].findIndex(w => w.id === activeWord.id + ' empty');
+                        if (positionToRemove !== -1) {
+                            newCollection.splice(positionToRemove, 1, wordToReturn);
+                            newCollection.splice(initialPosition, 1, wordToInsert);
+                            setWords(prev => ({
+                                ...prev,
+                                [FieldNames.Collection]: newCollection
+                            }));
+                            setReplacedWord(null);
+                            return
+                        } else {
+                            newCollection.splice(initialPosition, 1, wordToInsert);
+                            setWords(prev => ({
+                                ...prev,
+                                [FieldNames.Collection]: newCollection
+                            }));
+                            setReplacedWord(null);
+                            return
                         }
-                        newCollection.splice(replacedWord.initialIndex, 1, wordToInsert);
-                        setWords(prev => ({
-                            ...prev,
-                            [FieldNames.Collection]: newCollection
-                        }));
-                        setReplacedWord(null);
-                        return
                     }
+
                     if (!isNecessaryCell) {
-                        const newCollection = [...words[FieldNames.Collection]];
-                        const wordToInsert: WordToPick = {
-                            id: activeWord.id,
-                            content: activeWord.content,
-                            isRenderedInCollection: true,
+                        const indxToInsert = wordsFromBackend.findIndex(w => w.id === activeWord.id);
+                        const isFinalCellOccupied = words[FieldNames.Collection][indxToInsert].isRenderedInCollection;
+
+                        if (isFinalCellOccupied) {
+                            const [replacedId] = replacedWord.id.split(' ');
+                            const isReplacedWordTheSame = activeWord.id === replacedId;
+                            if (isReplacedWordTheSame) {
+                                const newCollection = [...words[FieldNames.Collection]];
+                                const indxToDelete = newCollection.findIndex(w => w.id === replacedId + ' temp');
+                                newCollection.splice(indxToDelete, 1);
+                                newCollection.splice(indxToInsert, 0, wordToInsert);
+                                setWords(prev => ({
+                                    ...prev,
+                                    [FieldNames.Collection]: newCollection
+                                }));
+                                setReplacedWord(null);
+                                return
+                            }
+                            if (!isReplacedWordTheSame) {
+                                const newCollection = [...words[FieldNames.Collection]];
+                                const indxToDelete = newCollection.findIndex(w => w.id === activeWord.id + ' empty');
+                                newCollection.splice(hoveredPosition, 1, wordToReturn);
+                                newCollection.splice(indxToDelete, 1);
+                                newCollection.splice(indxToInsert, 0, wordToInsert);
+                                setWords(prev => ({
+                                    ...prev,
+                                    [FieldNames.Collection]: newCollection
+                                }))
+                                setReplacedWord(null);
+                                return
+                            }
                         }
-                        const indxToInsert = words[FieldNames.Collection].findIndex(w => w.id === activeWord.id + ' empty');
-                        const wordToReturn: WordToPick = {
-                            id: replacedId + ' empty',
-                            content: replacedWord.content,
-                            isRenderedInCollection: false
-                        };
-                        newCollection.splice(replacedWord.initialIndex, 1, wordToReturn);
-                        newCollection.splice(indxToInsert, 1, wordToInsert);
-                        setWords(prev => ({
-                            ...prev,
-                            [FieldNames.Collection]: newCollection
-                        }));
-                        setReplacedWord(null);
+
+                        if (!isFinalCellOccupied) {
+                            const [replacedId] = replacedWord.id.split(' ');
+                            const isReplacedWordTheSame = activeWord.id === replacedId;
+                            console.log(replacedWord)
+                            if (isReplacedWordTheSame) {
+                                console.log('Replaced word is the same final position is empty cell is wrong');
+                                const newCollection = [...words[FieldNames.Collection]];
+                                const cellToReplace = newCollection[indxToInsert];
+                                newCollection.splice(hoveredPosition, 1, cellToReplace);
+                                newCollection.splice(indxToInsert, 1, wordToInsert);
+                                setWords(prev => ({
+                                    ...prev,
+                                    [FieldNames.Collection]: newCollection
+                                }));
+                                setReplacedWord(null);
+                                return
+                            } else {
+                                console.log('Replaced word is different final position is empty cell is wrong');
+                                const newCollection = [...words[FieldNames.Collection]];
+                                console.log(words[FieldNames.Collection]);
+                                newCollection.splice(hoveredPosition, 1, wordToReturn);
+                                const cellToReplace = newCollection[indxToInsert];
+                                newCollection.splice(indxToInsert, 1, wordToInsert);
+                                const indxToDelete = newCollection.findIndex(w => w.id === activeWord.id + ' empty');
+                                if (indxToDelete !== -1) {
+                                    newCollection.splice(indxToDelete, 1, cellToReplace);
+                                }
+                                console.log(newCollection);
+                                setWords(prev => ({
+                                    ...prev,
+                                    [FieldNames.Collection]: newCollection,
+                                }))
+                                setReplacedWord(null);
+                                return;
+                            }
+                        }
                         return
                     }
                 }
@@ -298,8 +388,10 @@ function App() {
                         content: activeWord.content,
                         isRenderedInCollection: true,
                     }
-                    const indexToInsert = newCollection.findIndex(w => w.id === activeWord.id + ' empty');
-                    newCollection.splice(indexToInsert, 1, wordToInsert);
+                    const indexToInsert = wordsFromBackend.findIndex(w => w.id === activeWord.id);
+                    newCollection.splice(indexToInsert, 0, wordToInsert);
+                    const indexToDelete = newCollection.findIndex(w => w.id === activeWord.id + ' empty');
+                    newCollection.splice(indexToDelete, 1);
                     setWords(prev => ({
                         ...prev,
                         [FieldNames.Collection]: newCollection,
@@ -350,9 +442,11 @@ function App() {
                     content: activeWord.content,
                     isRenderedInCollection: true,
                 }
-                const indexToInsert = words[FieldNames.Collection].findIndex(w => w.id === activeWord.id + ' empty');
+                const indexToDelete = words[FieldNames.Collection].findIndex(w => w.id === activeWord.id + ' empty');
+                const indexToInsert = wordsFromBackend.findIndex(w => w.id === activeWord.id);
                 const newCollection = [...words[FieldNames.Collection]];
-                newCollection.splice(indexToInsert, 1, wordToInsert);
+                newCollection.splice(indexToDelete, 1);
+                newCollection.splice(indexToInsert, 0, wordToInsert);
                 setWords(prev => ({
                     ...prev,
                     [FieldNames.Collection]: newCollection,
